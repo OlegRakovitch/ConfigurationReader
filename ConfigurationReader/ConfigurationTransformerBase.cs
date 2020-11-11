@@ -1,9 +1,13 @@
 ﻿namespace ConfigurationReader
 {
-    public class JoinConfigurationTransformer
+    public class ConfigurationTransformerBase
     {
+        protected Configuration Root;
+
         public Configuration Transform(Configuration configuration)
         {
+            if (Root == null) Root = configuration;
+
             if (configuration.Items != null)
             {
                 for (int i = 0; i < configuration.Items.Length; i++)
@@ -18,14 +22,11 @@
                 {
                     configuration.Properties[key] = Transform(configuration.Properties[key]);
                 }
-
-                if (configuration.Properties.TryGetValue("operator", out var value) && "join" == value && configuration.Properties.TryGetValue("data", out var data))
-                {
-                    return new JoinConfiguration(data);
-                }
             }
 
-            return configuration;
+            return Transformation(configuration);
         }
+
+        protected virtual Configuration Transformation(Configuration configuration) => configuration;
     }
 }

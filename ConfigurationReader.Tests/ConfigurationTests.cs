@@ -12,28 +12,28 @@ namespace ConfigurationReader.Tests
         [Fact]
         public void CanCreateStringConfiguration()
         {
-            var configuration = new Configuration("string");
+            var configuration = Configuration.String("string");
             Assert.Equal("string", configuration);
         }
 
         [Fact]
         public void CanCreateIntConfiguration()
         {
-            var configuration = new Configuration(42);
+            var configuration = Configuration.Int(42);
             Assert.Equal(42, configuration);
         }
 
         [Fact]
         public void CanCreateBoolConfiguration()
         {
-            var configuration = new Configuration(true);
+            var configuration = Configuration.Bool(true);
             Assert.True(configuration);
         }
 
         [Fact]
         public void CanCreateStringArrayConfiguration()
         {
-            var configuration = new Configuration(new[] { new Configuration("value1"), new Configuration("value2") });
+            var configuration = Configuration.Array(new[] { Configuration.String("value1"), Configuration.String("value2") });
             Assert.Equal(new[] { "value1", "value2" }, configuration);
             Assert.Equal("value1", configuration[0]);
             Assert.Equal("value2", configuration[1]);
@@ -42,7 +42,7 @@ namespace ConfigurationReader.Tests
         [Fact]
         public void CanCreateIntArrayConfiguration()
         {
-            var configuration = new Configuration(new[] { new Configuration(42), new Configuration(1337) });
+            var configuration = Configuration.Array(new[] { Configuration.Int(42), Configuration.Int(1337) });
             Assert.Equal(new[] { 42, 1337 }, configuration);
             Assert.Equal(42, configuration[0]);
             Assert.Equal(1337, configuration[1]);
@@ -51,7 +51,7 @@ namespace ConfigurationReader.Tests
         [Fact]
         public void CanCreateBoolArrayConfiguration()
         {
-            var configuration = new Configuration(new[] { new Configuration(true), new Configuration(false) });
+            var configuration = Configuration.Array(new[] { Configuration.Bool(true), Configuration.Bool(false) });
             Assert.Equal(new[] { true, false }, configuration);
             Assert.True(configuration[0]);
             Assert.False(configuration[1]);
@@ -60,11 +60,11 @@ namespace ConfigurationReader.Tests
         [Fact]
         public void CanCreateObjectConfiguration()
         {
-            var configuration = new Configuration(new Dictionary<string, Configuration>()
+            var configuration = Configuration.Dictionary(new ()
             {
-                { "stringKey", new Configuration("value") },
-                { "intKey", new Configuration(42) },
-                { "boolKey", new Configuration(true) }
+                { "stringKey", Configuration.String("value") },
+                { "intKey", Configuration.Int(42) },
+                { "boolKey", Configuration.Bool(true) }
             });
             Assert.Equal("value", configuration["stringKey"]);
             Assert.Equal(42, configuration["intKey"]);
@@ -74,31 +74,31 @@ namespace ConfigurationReader.Tests
         [Fact]
         public void CanUpdateStringArrayConfiguration()
         {
-            var configuration = new Configuration(new[] { new Configuration("value") });
-            configuration[0] = new Configuration("value2");
+            var configuration = Configuration.Array(new[] { Configuration.String("value") });
+            configuration[0] = Configuration.String("value2");
             Assert.Equal("value2", configuration[0]);
         }
 
         [Fact]
         public void CanUpdateIntArrayConfiguration()
         {
-            var configuration = new Configuration(new[] { new Configuration(42) });
-            configuration[0] = new Configuration(1337);
+            var configuration = Configuration.Array(new[] { Configuration.Int(42) });
+            configuration[0] = Configuration.Int(1337);
             Assert.Equal(1337, configuration[0]);
         }
 
         [Fact]
         public void CanUpdateBoolArrayConfiguration()
         {
-            var configuration = new Configuration(new[] { new Configuration(true) });
-            configuration[0] = new Configuration(false);
+            var configuration = Configuration.Array(new[] { Configuration.Bool(true) });
+            configuration[0] = Configuration.Bool(false);
             Assert.False(configuration[0]);
         }
 
         [Fact]
         public void CanReferenceAnotherConfiguration()
         {
-            var configuration = new Configuration(new[] { new Configuration(true), new Configuration(false) });
+            var configuration = Configuration.Array(new[] { Configuration.Bool(true), Configuration.Bool(false) });
             configuration[0] = configuration[1];
             Assert.Equal(configuration[0], configuration[1]);
         }

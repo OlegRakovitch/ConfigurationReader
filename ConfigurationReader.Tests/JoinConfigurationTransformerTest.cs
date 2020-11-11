@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Xunit;
+﻿using Xunit;
 
 namespace ConfigurationReader.Tests
 {
@@ -8,9 +7,9 @@ namespace ConfigurationReader.Tests
         [Fact]
         public void DoesNotReplaceConfigurationIfThereIsNoDataSpecified()
         {
-            var configuration = new Configuration(new Dictionary<string, Configuration>()
+            var configuration = Configuration.Dictionary(new ()
             {
-                { "operator", new Configuration("join") }
+                { "operator", Configuration.String("join") }
             });
             var transformed = Transform(configuration);
             Assert.Equal("join", transformed["operator"]);
@@ -19,9 +18,16 @@ namespace ConfigurationReader.Tests
         [Fact]
         public void DoesNotReplaceConfigurationIfThereIsNoOperatorSpecified()
         {
-            var configuration = new Configuration(new Dictionary<string, Configuration>()
+            var configuration = Configuration.Dictionary(new ()
             {
-                { "data", new Configuration(new[] { new Configuration("value1"), new Configuration("value2") }) }
+                {
+                    "data",
+                    Configuration.Array(new[]
+                    {
+                        Configuration.String("value1"),
+                        Configuration.String("value2")
+                    })
+                }
             });
             var transformed = Transform(configuration);
             Assert.Equal("value1", transformed["data"][0]);
@@ -31,10 +37,10 @@ namespace ConfigurationReader.Tests
         [Fact]
         public void ReplacesOrdinaryConfigurationWithJoinConfiguration()
         {
-            var configuration = new Configuration(new Dictionary<string, Configuration>()
+            var configuration = Configuration.Dictionary(new ()
             {
-                { "operator", new Configuration("join") },
-                { "data", new Configuration(new [] { new Configuration("value1"), new Configuration("value2") }) }
+                { "operator", Configuration.String("join") },
+                { "data", Configuration.Array(new[] { Configuration.String("value1"), Configuration.String("value2") }) }
             });
             var transformed = Transform(configuration);
             Assert.Equal("value1value2", transformed);
@@ -43,15 +49,15 @@ namespace ConfigurationReader.Tests
         [Fact]
         public void ReplacesOrdinaryNestedConfigurationWithJoinConfiguration()
         {
-            var innerConfiguration = new Configuration(new Dictionary<string, Configuration>()
+            var innerConfiguration = Configuration.Dictionary(new ()
             {
-                { "operator", new Configuration("join") },
-                { "data", new Configuration(new[] { new Configuration("value2"), new Configuration("value3")}) }
+                { "operator", Configuration.String("join") },
+                { "data", Configuration.Array(new[] { Configuration.String("value2"), Configuration.String("value3") }) }
             });
-            var configuration = new Configuration(new Dictionary<string, Configuration>()
+            var configuration = Configuration.Dictionary(new ()
             {
-                { "operator", new Configuration("join") },
-                { "data", new Configuration(new[] { new Configuration("value1"), innerConfiguration }) }
+                { "operator", Configuration.String("join") },
+                { "data", Configuration.Array(new[] { Configuration.String("value1"), innerConfiguration }) }
             });
             var transformed = Transform(configuration);
             Assert.Equal("value1value2value3", transformed);

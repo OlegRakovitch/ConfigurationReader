@@ -24,9 +24,9 @@ namespace ConfigurationReader
 
         Configuration CreateConfiguration(JToken token) => token switch
         {
-            JObject obj => new Configuration(ReadProperties(obj)),
-            JValue value => new Configuration(ReadValue(value)),
-            JArray array => new Configuration(ReadItems(array)),
+            JObject obj => Configuration.Dictionary(ReadProperties(obj)),
+            JValue value => ValueConfiguration(value),
+            JArray array => Configuration.Array(ReadItems(array)),
             _ => throw new InvalidConfigurationException()
         };
 
@@ -40,11 +40,11 @@ namespace ConfigurationReader
                 .Select(c => CreateConfiguration(c))
                 .ToArray();
 
-        static object ReadValue(JValue value) => value.Type switch
+        static Configuration ValueConfiguration(JValue value) => value.Type switch
         {
-            JTokenType.String => value.Value<string>(),
-            JTokenType.Integer => value.Value<int>(),
-            JTokenType.Boolean => value.Value<bool>(),
+            JTokenType.String => Configuration.String(value.Value<string>()),
+            JTokenType.Integer => Configuration.Int(value.Value<int>()),
+            JTokenType.Boolean => Configuration.Bool(value.Value<bool>()),
             _ => null
         };
     }

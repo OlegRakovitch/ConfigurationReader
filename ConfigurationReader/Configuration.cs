@@ -10,13 +10,34 @@ namespace ConfigurationReader
         public readonly Configuration[] Items;
         public readonly Dictionary<string, Configuration> Properties;
 
-        public Configuration(object value)
+        public static Configuration String(string value)
+            => new Configuration(value);
+
+        protected Configuration(string value)
             => Value = value;
 
-        public Configuration(Configuration[] items)
+        public static Configuration Int(int value)
+            => new Configuration(value);
+
+        protected Configuration(int value)
+            => Value = value;
+
+        public static Configuration Bool(bool value)
+            => new Configuration(value);
+
+        protected Configuration(bool value)
+            => Value = value;
+
+        public static Configuration Array(Configuration[] items)
+            => new Configuration(items);
+
+        protected Configuration(Configuration[] items)
             => Items = items;
 
-        public Configuration(Dictionary<string, Configuration> properties)
+        public static Configuration Dictionary(Dictionary<string, Configuration> properties)
+            => new Configuration(properties);
+
+        protected Configuration(Dictionary<string, Configuration> properties)
             => Properties = properties;
 
         public Configuration this[string key]
@@ -60,13 +81,13 @@ namespace ConfigurationReader
         static T[] ToArray<T>(Configuration configuration, Func<Configuration, T> to)
             => configuration.Items.Select(to).ToArray();
 
-        string String()
+        public string String()
             => (string)Value;
 
-        int Int()
+        public int Int()
             => (int)Value;
 
-        bool Bool()
+        public bool Bool()
             => (bool)Value;
     }
 }

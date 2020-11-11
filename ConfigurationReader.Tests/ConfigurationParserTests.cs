@@ -5,13 +5,13 @@ using Xunit;
 
 namespace ConfigurationReader.Tests
 {
-    public class ReaderTests
+    public class ConfigurationParserTests
     {
-        readonly Reader Reader;
+        readonly ConfigurationParser Reader;
         
-        public ReaderTests()
+        public ConfigurationParserTests()
         {
-            Reader = new Reader();
+            Reader = new ConfigurationParser();
         }
 
         [Fact]
@@ -182,6 +182,6 @@ namespace ConfigurationReader.Tests
             => Read(JsonConvert.SerializeObject(configuration));
 
         Configuration Read(string configuration)
-            => Reader.Read(configuration);
+            => Reader.Parse(configuration);
     }
 }

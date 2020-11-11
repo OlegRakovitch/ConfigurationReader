@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConfigurationReader
 {
     public class Configuration
     {
         readonly object Value;
-        readonly Configuration[] Items;
-        readonly Dictionary<string, Configuration> Properties;
+        public readonly Configuration[] Items;
+        public readonly Dictionary<string, Configuration> Properties;
 
         public Configuration(object value)
             => Value = value;
@@ -29,14 +27,24 @@ namespace ConfigurationReader
             }
         }
 
-        public Configuration this[int index] => Items[index];
+        public Configuration this[int index]
+        {
+            get
+            {
+                return Items[index];
+            }
+            set
+            {
+                Items[index] = value;
+            }
+        }
 
         public static implicit operator string(Configuration configuration)
             => configuration.String();
 
         public static implicit operator int(Configuration configuration)
             => configuration.Int();
-
+        
         public static implicit operator bool(Configuration configuration)
             => configuration.Bool();
 

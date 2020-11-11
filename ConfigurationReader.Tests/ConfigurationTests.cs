@@ -70,5 +70,37 @@ namespace ConfigurationReader.Tests
             Assert.Equal(42, configuration["intKey"]);
             Assert.True(configuration["boolKey"]);
         }
+
+        [Fact]
+        public void CanUpdateStringArrayConfiguration()
+        {
+            var configuration = new Configuration(new[] { new Configuration("value") });
+            configuration[0] = new Configuration("value2");
+            Assert.Equal("value2", configuration[0]);
+        }
+
+        [Fact]
+        public void CanUpdateIntArrayConfiguration()
+        {
+            var configuration = new Configuration(new[] { new Configuration(42) });
+            configuration[0] = new Configuration(1337);
+            Assert.Equal(1337, configuration[0]);
+        }
+
+        [Fact]
+        public void CanUpdateBoolArrayConfiguration()
+        {
+            var configuration = new Configuration(new[] { new Configuration(true) });
+            configuration[0] = new Configuration(false);
+            Assert.False(configuration[0]);
+        }
+
+        [Fact]
+        public void CanReferenceAnotherConfiguration()
+        {
+            var configuration = new Configuration(new[] { new Configuration(true), new Configuration(false) });
+            configuration[0] = configuration[1];
+            Assert.Equal(configuration[0], configuration[1]);
+        }
     }
 }

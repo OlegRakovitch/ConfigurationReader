@@ -5,13 +5,12 @@ namespace ConfigurationReader
 {
     public class JoinTransformationRule : TransformationRule
     {
-        public bool IsApplicable(Configuration configuration)
-            => configuration.Properties != null && configuration.Properties.ContainsKey("join");
+        public string PropertyName => "join";
 
-        public IEnumerable<Configuration> AffectedConfigurations(Configuration configuration)
-            => configuration.Properties["join"].Items;
+        public IEnumerable<Configuration> DependentConfigurations(Configuration configuration)
+            => configuration[PropertyName].Items;
 
-        public Configuration Apply(IEnumerable<Configuration> items)
-            => Configuration.String(string.Join(string.Empty, items.Select(item => item.String())));
+        public Configuration Apply(Configuration configuration)
+            => Configuration.String(string.Join(string.Empty, configuration[PropertyName].Items.Select(item => item.String())));
     }
 }

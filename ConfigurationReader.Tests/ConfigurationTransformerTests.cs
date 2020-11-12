@@ -37,29 +37,27 @@ namespace ConfigurationReader.Tests
 
     public class TrimTransformationRule : TransformationRule
     {
-        public bool IsApplicable(Configuration configuration)
-            => configuration.Properties != null && configuration.Properties.ContainsKey("trim");
+        public string PropertyName => "trim";
 
-        public IEnumerable<Configuration> AffectedConfigurations(Configuration configuration)
+        public IEnumerable<Configuration> DependentConfigurations(Configuration configuration)
         {
-            yield return configuration["trim"];
+            yield return configuration[PropertyName];
         }
 
-        public Configuration Apply(IEnumerable<Configuration> items)
-            => Configuration.String(items.Single().String().Trim());
+        public Configuration Apply(Configuration configuration)
+            => Configuration.String(configuration[PropertyName].String().Trim());
     }
 
     public class UppercaseTransformationRule : TransformationRule
     {
-        public bool IsApplicable(Configuration configuration)
-            => configuration.Properties != null && configuration.Properties.ContainsKey("uppercase");
+        public string PropertyName => "uppercase";
 
-        public IEnumerable<Configuration> AffectedConfigurations(Configuration configuration)
+        public IEnumerable<Configuration> DependentConfigurations(Configuration configuration)
         {
-            yield return configuration["uppercase"];
+            yield return configuration[PropertyName];
         }
 
-        public Configuration Apply(IEnumerable<Configuration> items)
-            => Configuration.String(items.Single().String().ToUpper());
+        public Configuration Apply(Configuration configuration)
+            => Configuration.String(configuration[PropertyName].String().ToUpper());
     }
 }

@@ -4,10 +4,10 @@ namespace ConfigurationReader
 {
     public interface TransformationRule
     {
-        bool IsApplicable(Configuration configuration);
+        string PropertyName { get; }
 
-        IEnumerable<Configuration> AffectedConfigurations(Configuration configuration);
+        IEnumerable<Configuration> DependentConfigurations(Configuration configuration);
 
-        Configuration Apply(IEnumerable<Configuration> items);
+        Configuration Apply(Configuration configuration);
     }
 }

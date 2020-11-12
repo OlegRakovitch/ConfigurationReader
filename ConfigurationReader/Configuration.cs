@@ -6,20 +6,31 @@ namespace ConfigurationReader
 {
     public class Configuration
     {
+        Configuration ParentConfiguration;
         readonly object Value;
-        Configuration Parent;
-        public readonly Configuration[] Items;
-        public readonly Dictionary<string, Configuration> Properties;
+        readonly Configuration[] ConfigurationItems;
+        readonly Dictionary<string, Configuration> ConfigurationProperties;
 
         public Configuration Root
         {
             get
             {
                 var node = this;
-                while (node.Parent != null) node = node.Parent;
+                while (node.ParentConfiguration != null) node = node.ParentConfiguration;
                 return node;
             }
         }
+
+        public Configuration Parent => ParentConfiguration;
+
+        public IEnumerable<Configuration> Properties => ConfigurationProperties == null ? Enumerable.Empty<Configuration>() : ConfigurationProperties.Values;
+
+        public IEnumerable<Configuration> Items => ConfigurationItems == null ? Enumerable.Empty<Configuration>() : ConfigurationItems;
+
+        public IEnumerable<string> Keys => ConfigurationProperties == null ? Enumerable.Empty<string>() : ConfigurationProperties.Keys;
+
+        public IEnumerable<int> Indices => ConfigurationItems == null ? Enumerable.Empty<int>() : Enumerable.Range(0, ConfigurationItems.Length);
+
 
         public static Configuration String(string value)
             => new Configuration(value);
@@ -44,10 +55,10 @@ namespace ConfigurationReader
 
         protected Configuration(Configuration[] items)
         {
-            Items = items;
+            ConfigurationItems = items;
             foreach(var configuration in items)
             {
-                configuration.Parent = this;
+                configuration.ParentConfiguration = this;
             }
         }
 
@@ -56,10 +67,10 @@ namespace ConfigurationReader
 
         protected Configuration(Dictionary<string, Configuration> properties)
         {
-            Properties = properties;
+            ConfigurationProperties = properties;
             foreach(var configuration in properties.Values)
             {
-                configuration.Parent = this;
+                configuration.ParentConfiguration = this;
             }
         }
 
@@ -67,13 +78,13 @@ namespace ConfigurationReader
         {
             get
             {
-                return Properties[key];
+                return ConfigurationProperties[key];
             }
             set
             {
-                Properties[key] = value;
-                if (value.Parent == null)
-                    value.Parent = this;
+                ConfigurationProperties[key] = value;
+                if (value.ParentConfiguration == null)
+                    value.ParentConfiguration = this;
             }
         }
 
@@ -81,13 +92,13 @@ namespace ConfigurationReader
         {
             get
             {
-                return Items[index];
+                return ConfigurationItems[index];
             }
             set
             {
-                Items[index] = value;
-                if (value.Parent == null)
-                    value.Parent = this;
+                ConfigurationItems[index] = value;
+                if (value.ParentConfiguration == null)
+                    value.ParentConfiguration = this;
             }
         }
 
@@ -110,7 +121,7 @@ namespace ConfigurationReader
             => ToArray(configuration, c => c.Bool());
 
         static T[] ToArray<T>(Configuration configuration, Func<Configuration, T> to)
-            => configuration.Items.Select(to).ToArray();
+            => configuration.ConfigurationItems.Select(to).ToArray();
 
         public string String()
             => (string)Value;

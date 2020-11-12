@@ -10,12 +10,21 @@ namespace ConfigurationReader
         readonly static Regex KeysRegex = new Regex(@$"(?<{MatchGroupName}>\[\d+\]|\w+)(?<{MatchGroupName}>\[\d+\]|\.\w+)*");
         readonly static Regex UnnecessaryCharactersRegex = new Regex(@"(\[|\]|\.)*");
 
-        public bool IsApplicable(Configuration configuration)
-            => configuration.Properties != null && configuration.Properties.ContainsKey("ref");
+        public string PropertyName => "ref";
 
-        public IEnumerable<Configuration> AffectedConfigurations(Configuration configuration)
+        public IEnumerable<Configuration> DependentConfigurations(Configuration configuration)
         {
-            var reference = configuration["ref"];
+            yield return configuration[PropertyName];
+            var node = LocateReferencedNode(configuration);
+            yield return node;
+        }
+
+        public Configuration Apply(Configuration configuration)
+            => LocateReferencedNode(configuration);
+
+        Configuration LocateReferencedNode(Configuration configuration)
+        {
+            var reference = configuration[PropertyName];
             var match = KeysRegex.Match(reference);
             var keys = GetKeys(match);
             var node = configuration.Root;
@@ -23,11 +32,9 @@ namespace ConfigurationReader
             {
                 node = int.TryParse(key, out var index) ? node[index] : node[key];
             }
-            yield return node;
-        }
 
-        public Configuration Apply(IEnumerable<Configuration> items)
-            => items.Single();
+            return node;
+        }
 
         static IEnumerable<string> GetKeys(Match match)
             => match

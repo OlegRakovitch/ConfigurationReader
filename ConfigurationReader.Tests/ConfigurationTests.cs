@@ -102,5 +102,103 @@ namespace ConfigurationReader.Tests
             configuration[0] = configuration[1];
             Assert.Equal(configuration[0], configuration[1]);
         }
+
+        [Fact]
+        public void ReturnsNoKeysIfConfigurationIsEmpty()
+        {
+            var configuration = Configuration.Dictionary(new() { });
+            Assert.Equal(Array.Empty<string>(), configuration.Keys);
+        }
+
+        [Fact]
+        public void CanIterateConfigurationKeys()
+        {
+            var configuration = Configuration.Dictionary(new()
+            {
+                { "key1", Configuration.String("value1") },
+                { "key2", Configuration.String("value2") }
+            });
+            Assert.Equal(new[] { "key1", "key2" }, configuration.Keys);
+        }
+
+        [Fact]
+        public void ReturnsNoIndicesIfConfigurationIsEmpty()
+        {
+            var configuration = Configuration.Array(Array.Empty<Configuration>());
+            Assert.Equal(Array.Empty<int>(), configuration.Indices);
+        }
+
+        [Fact]
+        public void CanIterateConfigurationIndices()
+        {
+            var configuration = Configuration.Array(new[]
+            {
+                Configuration.String("value1"),
+                Configuration.String("value2")
+            });
+            Assert.Equal(new[] { 0, 1 }, configuration.Indices);
+        }
+
+        [Fact]
+        public void ReturnsEmptyArrayIfNoConfigurationItems()
+        {
+            var configuration = Configuration.String("value");
+            Assert.Equal(Array.Empty<Configuration>(), configuration.Items);
+        }
+
+        [Fact]
+        public void ReturnsConfigurationItems()
+        {
+            var configuration = Configuration.Array(new[]
+            {
+                Configuration.String("value1"),
+                Configuration.String("value2")
+            });
+            Assert.Equal(new[] { "value1", "value2" }, configuration.Items.Select(item => item.String()));
+        }
+
+        [Fact]
+        public void ReturnsEmptyArrayIfNoConfigurationProperties()
+        {
+            var configuration = Configuration.String("value");
+            Assert.Equal(Array.Empty<Configuration>(), configuration.Properties);
+        }
+
+        [Fact]
+        public void ReturnsConfigurationProperties()
+        {
+            var configuration = Configuration.Dictionary(new()
+            {
+                { "key1", Configuration.String("value1") },
+                { "key2", Configuration.String("value2") }
+            });
+            Assert.Equal(new[] { "value1", "value2" }, configuration.Properties.Select(item => item.String()));
+        }
+
+        [Fact]
+        public void ReturnsNullAsParentConfigurationForSimpleConfiguration()
+        {
+            var configuration = Configuration.String("value");
+            Assert.Null(configuration.Parent);
+        }
+
+        [Fact]
+        public void ReturnsParentConfigurationForDictionaryItem()
+        {
+            var inner = Configuration.String("value");
+            var configuration = Configuration.Dictionary(new()
+            {
+                { "key", inner }
+            });
+            Assert.Equal(configuration, inner.Parent);
+        }
+
+        [Fact]
+        public void ReturnsParentConfigurationForArrayItem()
+        {
+            var inner = Configuration.String("value");
+            var configuration = Configuration.Array(new[] { inner });
+            Assert.Equal(configuration, inner.Parent);
+        }
     }
 }

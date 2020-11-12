@@ -105,7 +105,10 @@ namespace ConfigurationReader.Tests
 
         static Configuration Transform(Configuration configuration)
         {
-            var transformer = new ReferenceConfigurationTransformer();
+            var transformer = new ConfigurationTransformer(new TransformationRule[]
+            {
+                new ReferenceTransformationRule()
+            });
             return transformer.Transform(configuration);
         }
     }

@@ -12,7 +12,7 @@
             {
                 for (int i = 0; i < configuration.Items.Length; i++)
                 {
-                    configuration.Items[i] = Transform(configuration.Items[i]);
+                    configuration[i] = Transform(configuration[i]);
                 }
             }
 
@@ -20,7 +20,7 @@
             {
                 foreach (var key in configuration.Properties.Keys)
                 {
-                    configuration.Properties[key] = Transform(configuration.Properties[key]);
+                    configuration[key] = Transform(configuration[key]);
                 }
             }
 

@@ -7,8 +7,19 @@ namespace ConfigurationReader
     public class Configuration
     {
         readonly object Value;
+        Configuration Parent;
         public readonly Configuration[] Items;
         public readonly Dictionary<string, Configuration> Properties;
+
+        public Configuration Root
+        {
+            get
+            {
+                var node = this;
+                while (node.Parent != null) node = node.Parent;
+                return node;
+            }
+        }
 
         public static Configuration String(string value)
             => new Configuration(value);
@@ -32,19 +43,37 @@ namespace ConfigurationReader
             => new Configuration(items);
 
         protected Configuration(Configuration[] items)
-            => Items = items;
+        {
+            Items = items;
+            foreach(var configuration in items)
+            {
+                configuration.Parent = this;
+            }
+        }
 
         public static Configuration Dictionary(Dictionary<string, Configuration> properties)
             => new Configuration(properties);
 
         protected Configuration(Dictionary<string, Configuration> properties)
-            => Properties = properties;
+        {
+            Properties = properties;
+            foreach(var configuration in properties.Values)
+            {
+                configuration.Parent = this;
+            }
+        }
 
         public Configuration this[string key]
         {
             get
             {
                 return Properties[key];
+            }
+            set
+            {
+                Properties[key] = value;
+                if (value.Parent == null)
+                    value.Parent = this;
             }
         }
 
@@ -57,6 +86,8 @@ namespace ConfigurationReader
             set
             {
                 Items[index] = value;
+                if (value.Parent == null)
+                    value.Parent = this;
             }
         }
 

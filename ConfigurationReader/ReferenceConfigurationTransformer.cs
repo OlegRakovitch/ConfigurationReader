@@ -4,30 +4,21 @@ using System.Text.RegularExpressions;
 
 namespace ConfigurationReader
 {
-    public class ReferenceConfigurationTransformer : ConfigurationTransformerBase
+    public class ReferenceTransformationRule : TransformationRule
     {
         const string MatchGroupName = "references";
-        readonly Regex KeysRegex = new Regex(@$"(?<{MatchGroupName}>\[\d+\]|\w+)(?<{MatchGroupName}>\[\d+\]|\.\w+)*");
-        readonly Regex UnnecessaryCharactersRegex = new Regex(@"(\[|\]|\.)*");
+        readonly static Regex KeysRegex = new Regex(@$"(?<{MatchGroupName}>\[\d+\]|\w+)(?<{MatchGroupName}>\[\d+\]|\.\w+)*");
+        readonly static Regex UnnecessaryCharactersRegex = new Regex(@"(\[|\]|\.)*");
 
-        protected override Configuration Transformation(Configuration configuration)
-        {
-            if (NeedToTransform(configuration))
-            {
-                return TransformItems(TransformedItems(ItemsToTransform(configuration)));
-            }
-            return configuration;
-        }
-
-        bool NeedToTransform(Configuration configuration)
+        public bool IsApplicable(Configuration configuration)
             => configuration.Properties != null && configuration.Properties.ContainsKey("ref");
 
-        IEnumerable<Configuration> ItemsToTransform(Configuration configuration)
+        public IEnumerable<Configuration> AffectedConfigurations(Configuration configuration)
         {
-            var reference = configuration.Properties["ref"];
+            var reference = configuration["ref"];
             var match = KeysRegex.Match(reference);
             var keys = GetKeys(match);
-            var node = Root;
+            var node = configuration.Root;
             foreach (var key in keys)
             {
                 node = int.TryParse(key, out var index) ? node[index] : node[key];
@@ -35,19 +26,16 @@ namespace ConfigurationReader
             yield return node;
         }
 
-        IEnumerable<Configuration> TransformedItems(IEnumerable<Configuration> items)
-            => items.Select(item => Transform(item));
-
-        Configuration TransformItems(IEnumerable<Configuration> items)
+        public Configuration Apply(IEnumerable<Configuration> items)
             => items.Single();
 
-        IEnumerable<string> GetKeys(Match match)
+        static IEnumerable<string> GetKeys(Match match)
             => match
                 .Groups[MatchGroupName]
                 .Captures
                 .Select(capture => RemoveUnnecessaryCharacters(capture.Value));
 
-        string RemoveUnnecessaryCharacters(string input)
+        static string RemoveUnnecessaryCharacters(string input)
             => UnnecessaryCharactersRegex.Replace(input, string.Empty);
     }
 }

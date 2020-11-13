@@ -9,17 +9,17 @@ namespace ConfigurationReader.Tests
         {
             var transformed = Transform(Configuration.Dictionary(new ()
             {
-                { "key", Configuration.String("value") },
+                { "key", Configuration.FromValue("value") },
                 { "referenced", ReferenceConfiguration("key")}
             }));
-            Assert.Equal("value", transformed["referenced"]);
+            Assert.Equal("value", transformed["referenced"].Value);
         }
 
         [Fact]
         public void CreatesReferenceToAnotherArrayConfiguration()
         {
-            var transformed = Transform(Configuration.Array(new[] { Configuration.String("value"), ReferenceConfiguration("[0]") }));
-            Assert.Equal("value", transformed[1]);
+            var transformed = Transform(Configuration.Array(new[] { Configuration.FromValue("value"), ReferenceConfiguration("[0]") }));
+            Assert.Equal("value", transformed[1].Value);
         }
 
         [Fact]
@@ -31,12 +31,12 @@ namespace ConfigurationReader.Tests
                     "key",
                     Configuration.Dictionary(new ()
                     {
-                        { "key2", Configuration.String("value") }
+                        { "key2", Configuration.FromValue("value") }
                     })
                 },
                 { "referenced", ReferenceConfiguration("key.key2")}
             }));
-            Assert.Equal("value", transformed["referenced"]);
+            Assert.Equal("value", transformed["referenced"].Value);
         }
 
         [Fact]
@@ -46,11 +46,11 @@ namespace ConfigurationReader.Tests
             {
                 Configuration.Array(new[]
                 {
-                    Configuration.String("value")
+                    Configuration.FromValue("value")
                 }),
                 ReferenceConfiguration("[0][0]")
             }));
-            Assert.Equal("value", transformed[1]);
+            Assert.Equal("value", transformed[1].Value);
         }
 
         [Fact]
@@ -64,13 +64,13 @@ namespace ConfigurationReader.Tests
                     {
                         Configuration.Dictionary(new ()
                         {
-                            { "inner", Configuration.String("value") }
+                            { "inner", Configuration.FromValue("value") }
                         })
                     })
                 },
                 { "referenced", ReferenceConfiguration("key[0].inner") }
             }));
-            Assert.Equal("value", transformed["referenced"]);
+            Assert.Equal("value", transformed["referenced"].Value);
         }
 
         [Fact]
@@ -78,11 +78,11 @@ namespace ConfigurationReader.Tests
         {
             var transformed = Transform(Configuration.Dictionary(new ()
             {
-                { "key", Configuration.String("value") },
+                { "key", Configuration.FromValue("value") },
                 { "reference1", ReferenceConfiguration("key") },
                 { "reference2", ReferenceConfiguration("reference1") }
             }));
-            Assert.Equal("value", transformed["reference2"]);
+            Assert.Equal("value", transformed["reference2"].Value);
         }
 
         [Fact]
@@ -90,17 +90,17 @@ namespace ConfigurationReader.Tests
         {
             var transformed = Transform(Configuration.Dictionary(new()
             {
-                { "key", Configuration.String("value") },
+                { "key", Configuration.FromValue("value") },
                 { "reference1", ReferenceConfiguration("reference2") },
                 { "reference2", ReferenceConfiguration("key") }
             }));
-            Assert.Equal("value", transformed["reference1"]);
+            Assert.Equal("value", transformed["reference1"].Value);
         }
 
         static Configuration ReferenceConfiguration(string referenceKey)
             => Configuration.Dictionary(new ()
             {
-                { "ref", Configuration.String(referenceKey) }
+                { "ref", Configuration.FromValue(referenceKey) }
             });
 
         static Configuration Transform(Configuration configuration)

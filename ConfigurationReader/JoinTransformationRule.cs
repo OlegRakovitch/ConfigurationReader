@@ -8,9 +8,9 @@ namespace ConfigurationReader
         public string PropertyName => "join";
 
         public IEnumerable<Configuration> DependentConfigurations(Configuration configuration)
-            => configuration[PropertyName].Items;
+            => configuration[PropertyName].Children;
 
         public Configuration Apply(Configuration configuration)
-            => Configuration.String(string.Join(string.Empty, configuration[PropertyName].Items.Select(item => item.String())));
+            => Configuration.FromValue(string.Join(string.Empty, configuration[PropertyName].Children.Select(item => item.Value.String())));
     }
 }

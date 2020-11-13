@@ -42,9 +42,9 @@ namespace ConfigurationReader
 
         static Configuration ValueConfiguration(JValue value) => value.Type switch
         {
-            JTokenType.String => Configuration.String(value.Value<string>()),
-            JTokenType.Integer => Configuration.Int(value.Value<int>()),
-            JTokenType.Boolean => Configuration.Bool(value.Value<bool>()),
+            JTokenType.String => Configuration.FromValue(value.Value<string>()),
+            JTokenType.Integer => Configuration.FromValue(value.Value<int>()),
+            JTokenType.Boolean => Configuration.FromValue(value.Value<bool>()),
             _ => null
         };
     }

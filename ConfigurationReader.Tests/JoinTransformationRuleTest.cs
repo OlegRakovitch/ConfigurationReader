@@ -17,14 +17,14 @@ namespace ConfigurationReader.Tests
                     "join",
                     Configuration.Array(new[]
                     {
-                        Configuration.String("value1"),
-                        Configuration.String("value2"),
-                        Configuration.String("value3")
+                        Configuration.FromValue("value1"),
+                        Configuration.FromValue("value2"),
+                        Configuration.FromValue("value3")
                     })
                 }
             });
             var transformed = transformer.Transform(configuration);
-            Assert.Equal("value1value2value3", transformed);
+            Assert.Equal("value1value2value3", transformed.Value);
         }
     }
 }

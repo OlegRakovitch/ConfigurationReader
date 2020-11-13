@@ -24,14 +24,14 @@ namespace ConfigurationReader.Tests
                             "uppercase",
                             Configuration.Dictionary(new()
                             {
-                                { "trim", Configuration.String(" value ") }
+                                { "trim", Configuration.FromValue(" value ") }
                             })
                         }
                     })
                 }
             });
             var transformed = transformer.Transform(configuration);
-            Assert.Equal("VALUE", transformed["key"]);
+            Assert.Equal("VALUE", transformed["key"].Value);
         }
     }
 
@@ -45,7 +45,7 @@ namespace ConfigurationReader.Tests
         }
 
         public Configuration Apply(Configuration configuration)
-            => Configuration.String(configuration[PropertyName].String().Trim());
+            => Configuration.FromValue(configuration[PropertyName].Value.String().Trim());
     }
 
     public class UppercaseTransformationRule : TransformationRule
@@ -58,6 +58,6 @@ namespace ConfigurationReader.Tests
         }
 
         public Configuration Apply(Configuration configuration)
-            => Configuration.String(configuration[PropertyName].String().ToUpper());
+            => Configuration.FromValue(configuration[PropertyName].Value.String().ToUpper());
     }
 }

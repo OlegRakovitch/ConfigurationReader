@@ -59,7 +59,7 @@ namespace ConfigurationReader.Tests
             };
             var parsed = parser.Parse(JsonConvert.SerializeObject(configuration));
             var transformed = transformer.Transform(parsed);
-            Assert.Equal("value", transformed["data"]["content"]);
+            Assert.Equal("value", transformed["data"]["content"].Value);
         }
 
         [Fact]
@@ -76,14 +76,14 @@ namespace ConfigurationReader.Tests
                     "key",
                     Configuration.Dictionary(new()
                     {
-                        { "ref", Configuration.String("source") }
+                        { "ref", Configuration.FromValue("source") }
                     })
                 },
                 {
                     "source",
                     Configuration.Dictionary(new()
                     {
-                        { "uppercase", Configuration.String("value") }
+                        { "uppercase", Configuration.FromValue("value") }
                     })
                 }
             });
@@ -109,7 +109,7 @@ namespace ConfigurationReader.Tests
                             "inner",
                             Configuration.Dictionary(new()
                             {
-                                { "ref", Configuration.String("source") }
+                                { "ref", Configuration.FromValue("source") }
                             })
                         }
                     })
@@ -118,14 +118,14 @@ namespace ConfigurationReader.Tests
                     "key",
                     Configuration.Dictionary(new()
                     {
-                        { "ref", Configuration.String("source") }
+                        { "ref", Configuration.FromValue("source") }
                     })
                 },
                 {
                     "source",
                     Configuration.Dictionary(new()
                     {
-                        { "uppercase", Configuration.String("value") }
+                        { "uppercase", Configuration.FromValue("value") }
                     })
                 }
             });

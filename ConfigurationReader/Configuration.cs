@@ -1,60 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace ConfigurationReader
 {
-    public record ConfigurationKey
-    {
-        readonly object Value;
-        readonly bool IsStringKey;
-
-        public static ConfigurationKey Index(int index)
-            => new ConfigurationKey(index);
-
-        public ConfigurationKey(int index)
-            => Value = index;
-
-        public static ConfigurationKey Key(string key)
-            => new ConfigurationKey(key);
-
-        public ConfigurationKey(string key)
-            => (Value, IsStringKey) = (key, true);
-
-        public static implicit operator string(ConfigurationKey key)
-            => key.String();
-
-        public static implicit operator int(ConfigurationKey key)
-            => key.Int();
-
-        public static implicit operator ConfigurationKey(string key)
-            => Key(key);
-
-        public static implicit operator ConfigurationKey(int index)
-            => Index(index);
-
-        public string String()
-            => (string)Value;
-
-        public int Int()
-            => (int)Value;
-
-        public bool IsString()
-            => IsStringKey;
-
-        public bool IsInt()
-            => !IsStringKey;
-
-        public override string ToString()
-            => $"{nameof(ConfigurationKey)} {Value}";
-    }
-
     public class Configuration
     {
         Configuration ParentConfiguration;
-        readonly object Value;
-
         readonly Dictionary<ConfigurationKey, Configuration> ChildrenConfigurations = new Dictionary<ConfigurationKey, Configuration>();
+
+        public readonly ConfigurationValue Value;
 
         public Configuration Root
         {
@@ -68,30 +22,20 @@ namespace ConfigurationReader
 
         public Configuration Parent => ParentConfiguration;
 
-        public IEnumerable<Configuration> Properties => Keys.Select(key => ChildrenConfigurations[ConfigurationKey.Key(key)]);
+        public IEnumerable<Configuration> Children => ChildrenConfigurations.Values;
 
-        public IEnumerable<Configuration> Items => Indices.Select(index => ChildrenConfigurations[ConfigurationKey.Index(index)]);
+        public IEnumerable<ConfigurationKey> Keys => ChildrenConfigurations.Keys;
 
-        public IEnumerable<string> Keys => ChildrenConfigurations.Keys.Where(key => key.IsString()).Select(key => key.String());
+        public static Configuration FromValue(string value)
+            => new Configuration(ConfigurationValue.String(value));
 
-        public IEnumerable<int> Indices => ChildrenConfigurations.Keys.Where(key => key.IsInt()).Select(key => key.Int());
+        public static Configuration FromValue(int value)
+            => new Configuration(ConfigurationValue.Int(value));
 
-        public static Configuration String(string value)
-            => new Configuration(value);
+        public static Configuration FromValue(bool value)
+            => new Configuration(ConfigurationValue.Bool(value));
 
-        protected Configuration(string value)
-            => Value = value;
-
-        public static Configuration Int(int value)
-            => new Configuration(value);
-
-        protected Configuration(int value)
-            => Value = value;
-
-        public static Configuration Bool(bool value)
-            => new Configuration(value);
-
-        protected Configuration(bool value)
+        Configuration(ConfigurationValue value)
             => Value = value;
 
         public static Configuration Array(Configuration[] items)
@@ -126,35 +70,5 @@ namespace ConfigurationReader
                     value.ParentConfiguration = this;
             }
         }
-
-        public static implicit operator string(Configuration configuration)
-            => configuration.String();
-
-        public static implicit operator int(Configuration configuration)
-            => configuration.Int();
-        
-        public static implicit operator bool(Configuration configuration)
-            => configuration.Bool();
-
-        public static implicit operator string[](Configuration configuration)
-            => ToArray(configuration, c => c.String());
-
-        public static implicit operator int[](Configuration configuration)
-            => ToArray(configuration, c => c.Int());
-
-        public static implicit operator bool[](Configuration configuration)
-            => ToArray(configuration, c => c.Bool());
-
-        static T[] ToArray<T>(Configuration configuration, Func<Configuration, T> to)
-            => configuration.ChildrenConfigurations.Values.Select(to).ToArray();
-
-        public string String()
-            => (string)Value;
-
-        public int Int()
-            => (int)Value;
-
-        public bool Bool()
-            => (bool)Value;
     }
 }

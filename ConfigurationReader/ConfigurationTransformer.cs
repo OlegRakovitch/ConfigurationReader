@@ -22,11 +22,6 @@ namespace ConfigurationReader
                 configuration[key] = Transform(configuration[key]);
             }
 
-            foreach (var index in configuration.Indices)
-            {
-                configuration[index] = Transform(configuration[index]);
-            }
-
             return configuration;
         }
 
@@ -34,36 +29,25 @@ namespace ConfigurationReader
         {
             if (!IsApplicable(rule, configuration)) return configuration;
 
-            var transformedConfigurations = new List<Configuration>();
+            TransformDependentConfigurations(rule.DependentConfigurations(configuration));
 
-            foreach (var dependentConfiguration in rule.DependentConfigurations(configuration))
-            {
-                var parent = dependentConfiguration.Parent;
-                if (parent.Properties.Contains(dependentConfiguration))
-                {
-                    var transformed = Transform(dependentConfiguration);
-                    var keys = parent.Keys.Where(k => parent[k] == dependentConfiguration);
-                    foreach(var key in keys)
-                        parent[key] = transformed;
-                    transformedConfigurations.Add(transformed);
-                }
-                if (parent.Items.Contains(dependentConfiguration))
-                {
-                    var transformed = Transform(dependentConfiguration);
-                    var indices = parent.Indices.Where(i => parent[i] == dependentConfiguration);
-                    foreach(var index in indices)
-                        parent[index] = transformed;
-                    transformedConfigurations.Add(transformed);
-                }
-            }
             return rule.Apply(configuration);
         }
 
-        static bool IsApplicable(TransformationRule rule, Configuration configuration)
-            => configuration.Keys.Count() == 1
-            && configuration.Keys.Single() == rule.PropertyName;
+        void TransformDependentConfigurations(IEnumerable<Configuration> configurations)
+        {
+            foreach (var dependent in configurations)
+            {
+                var parent = dependent.Parent;
+                var keys = parent.Keys.Where(key => parent[key] == dependent);
+                var transformed = Transform(dependent);
+                foreach (var key in keys)
+                    parent[key] = transformed;
+            }
+        }
 
-        IEnumerable<Configuration> Transform(IEnumerable<Configuration> items)
-            => items.Select(item => Transform(item));
+        static bool IsApplicable(TransformationRule rule, Configuration configuration)
+            => configuration.Children.Count() == 1
+            && configuration.Keys.Single() == rule.PropertyName;
     }
 }

@@ -25,22 +25,23 @@ namespace ConfigurationReader
         Configuration LocateReferencedNode(Configuration configuration)
         {
             var reference = configuration[PropertyName];
-            var match = KeysRegex.Match(reference);
+            var match = KeysRegex.Match(reference.Value);
             var keys = GetKeys(match);
             var node = configuration.Root;
             foreach (var key in keys)
-            {
-                node = int.TryParse(key, out var index) ? node[index] : node[key];
-            }
-
+                node = node[key];
             return node;
         }
 
-        static IEnumerable<string> GetKeys(Match match)
+        static IEnumerable<ConfigurationKey> GetKeys(Match match)
             => match
                 .Groups[MatchGroupName]
                 .Captures
-                .Select(capture => RemoveUnnecessaryCharacters(capture.Value));
+                .Select(capture => RemoveUnnecessaryCharacters(capture.Value))
+                .Select(key => ToConfigurationKey(key));
+
+        static ConfigurationKey ToConfigurationKey(string key)
+            => int.TryParse(key, out var index) ? index : key;
 
         static string RemoveUnnecessaryCharacters(string input)
             => UnnecessaryCharactersRegex.Replace(input, string.Empty);

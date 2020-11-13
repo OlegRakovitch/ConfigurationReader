@@ -36,42 +36,28 @@ namespace ConfigurationReader.Tests
         public void CanReadConfigurationForString()
         {
             var configuration = Parse(@"""value""");
-            Assert.Equal("value", configuration);
+            Assert.Equal("value", configuration.Value);
         }
 
         [Fact]
         public void CanReadConfigurationForInt()
         {
             var configuration = Parse(42);
-            Assert.Equal(42, configuration);
+            Assert.Equal(42, configuration.Value);
         }
 
         [Fact]
         public void CanReadConfigurationForBool()
         {
             var configuration = Parse(true);
-            Assert.True(configuration);
+            Assert.True(configuration.Value);
         }
 
         [Fact]
-        public void CanReadConfigurationForEmptyStringArray()
+        public void CanReadConfigurationForEmptyArray()
         {
             var configuration = Parse(Array.Empty<string>());
-            Assert.Equal(Array.Empty<string>(), configuration);
-        }
-
-        [Fact]
-        public void CanReadConfigurationForEmptyIntArray()
-        {
-            var configuration = Parse(Array.Empty<int>());
-            Assert.Equal(Array.Empty<int>(), configuration);
-        }
-
-        [Fact]
-        public void CanReadConfigurationForEmptyBoolArray()
-        {
-            var configuration = Parse(Array.Empty<bool>());
-            Assert.Equal(Array.Empty<bool>(), configuration);
+            Assert.Empty(configuration.Children);
         }
 
         [Fact]
@@ -85,21 +71,21 @@ namespace ConfigurationReader.Tests
         public void CanReadConfigurationForNonEmptyStringArray()
         {
             var configuration = Parse(new[] { "value" });
-            Assert.Equal("value", configuration[0]);
+            Assert.Equal("value", configuration[0].Value);
         }
 
         [Fact]
         public void CanReadConfigurationForNonEmptyIntArray()
         {
             var configuration = Parse(new[] { 42 });
-            Assert.Equal(42, configuration[0]);
+            Assert.Equal(42, configuration[0].Value);
         }
 
         [Fact]
         public void CanReadConfigurationForNonEmptyBoolArray()
         {
             var configuration = Parse(new[] { true });
-            Assert.True(configuration[0]);
+            Assert.True(configuration[0].Value);
         }
 
         [Fact]
@@ -137,28 +123,28 @@ namespace ConfigurationReader.Tests
         public void ReturnsValueWhenAccessingExistingStringKey()
         {
             var configuration = Parse(new { stringKey = "value" });
-            Assert.Equal("value", configuration["stringKey"]);
+            Assert.Equal("value", configuration["stringKey"].Value);
         }
 
         [Fact]
         public void ReturnsValueWhenAccessingExistingIntKey()
         {
             var configuration = Parse(new { intKey = 42 });
-            Assert.Equal(42, configuration["intKey"]);
+            Assert.Equal(42, configuration["intKey"].Value);
         }
 
         [Fact]
         public void ReturnsValueWhenAccessingExistingArrayKey()
         {
             var configuration = Parse(new { arrayKey = new[] { "value" } });
-            Assert.Equal("value", configuration["arrayKey"][0]);
+            Assert.Equal("value", configuration["arrayKey"][0].Value);
         }
 
         [Fact]
         public void ReturnsComplexNestedHierarchyKey()
         {
             var configuration = Parse(new { arrayKey = new[] { new { nestedKey = new { deepKey = "value" } } } });
-            Assert.Equal("value", configuration["arrayKey"][0]["nestedKey"]["deepKey"]);
+            Assert.Equal("value", configuration["arrayKey"][0]["nestedKey"]["deepKey"].Value);
         }
 
         [Fact]

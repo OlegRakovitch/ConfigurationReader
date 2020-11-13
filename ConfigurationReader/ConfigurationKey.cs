@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ConfigurationReader
+﻿namespace ConfigurationReader
 {
     public record ConfigurationKey
     {
         readonly object Value;
-        readonly bool IsStringKey;
 
         public static ConfigurationKey Index(int index)
             => new ConfigurationKey(index);
@@ -21,7 +14,7 @@ namespace ConfigurationReader
             => new ConfigurationKey(key);
 
         public ConfigurationKey(string key)
-            => (Value, IsStringKey) = (key, true);
+            => Value = key;
 
         public static implicit operator string(ConfigurationKey key)
             => key.String();
@@ -40,12 +33,6 @@ namespace ConfigurationReader
 
         public int Int()
             => (int)Value;
-
-        public bool IsString()
-            => IsStringKey;
-
-        public bool IsInt()
-            => !IsStringKey;
 
         public override string ToString()
             => $"{nameof(ConfigurationKey)} {Value}";

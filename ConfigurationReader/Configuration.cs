@@ -4,12 +4,57 @@ using System.Linq;
 
 namespace ConfigurationReader
 {
+    public record ConfigurationKey
+    {
+        readonly object Value;
+        readonly bool IsStringKey;
+
+        public static ConfigurationKey Index(int index)
+            => new ConfigurationKey(index);
+
+        public ConfigurationKey(int index)
+            => Value = index;
+
+        public static ConfigurationKey Key(string key)
+            => new ConfigurationKey(key);
+
+        public ConfigurationKey(string key)
+            => (Value, IsStringKey) = (key, true);
+
+        public static implicit operator string(ConfigurationKey key)
+            => key.String();
+
+        public static implicit operator int(ConfigurationKey key)
+            => key.Int();
+
+        public static implicit operator ConfigurationKey(string key)
+            => Key(key);
+
+        public static implicit operator ConfigurationKey(int index)
+            => Index(index);
+
+        public string String()
+            => (string)Value;
+
+        public int Int()
+            => (int)Value;
+
+        public bool IsString()
+            => IsStringKey;
+
+        public bool IsInt()
+            => !IsStringKey;
+
+        public override string ToString()
+            => $"{nameof(ConfigurationKey)} {Value}";
+    }
+
     public class Configuration
     {
         Configuration ParentConfiguration;
         readonly object Value;
-        readonly Configuration[] ConfigurationItems;
-        readonly Dictionary<string, Configuration> ConfigurationProperties;
+
+        readonly Dictionary<ConfigurationKey, Configuration> ChildrenConfigurations = new Dictionary<ConfigurationKey, Configuration>();
 
         public Configuration Root
         {
@@ -23,14 +68,13 @@ namespace ConfigurationReader
 
         public Configuration Parent => ParentConfiguration;
 
-        public IEnumerable<Configuration> Properties => ConfigurationProperties == null ? Enumerable.Empty<Configuration>() : ConfigurationProperties.Values;
+        public IEnumerable<Configuration> Properties => Keys.Select(key => ChildrenConfigurations[ConfigurationKey.Key(key)]);
 
-        public IEnumerable<Configuration> Items => ConfigurationItems == null ? Enumerable.Empty<Configuration>() : ConfigurationItems;
+        public IEnumerable<Configuration> Items => Indices.Select(index => ChildrenConfigurations[ConfigurationKey.Index(index)]);
 
-        public IEnumerable<string> Keys => ConfigurationProperties == null ? Enumerable.Empty<string>() : ConfigurationProperties.Keys;
+        public IEnumerable<string> Keys => ChildrenConfigurations.Keys.Where(key => key.IsString()).Select(key => key.String());
 
-        public IEnumerable<int> Indices => ConfigurationItems == null ? Enumerable.Empty<int>() : Enumerable.Range(0, ConfigurationItems.Length);
-
+        public IEnumerable<int> Indices => ChildrenConfigurations.Keys.Where(key => key.IsInt()).Select(key => key.Int());
 
         public static Configuration String(string value)
             => new Configuration(value);
@@ -53,50 +97,31 @@ namespace ConfigurationReader
         public static Configuration Array(Configuration[] items)
             => new Configuration(items);
 
-        protected Configuration(Configuration[] items)
-        {
-            ConfigurationItems = items;
-            foreach(var configuration in items)
-            {
-                configuration.ParentConfiguration = this;
-            }
-        }
+        Configuration(Configuration[] items)
+            : this(Enumerable.Range(0, items.Length).ToDictionary(index => ConfigurationKey.Index(index), index => items[index])) { }
 
         public static Configuration Dictionary(Dictionary<string, Configuration> properties)
             => new Configuration(properties);
 
-        protected Configuration(Dictionary<string, Configuration> properties)
+        Configuration(Dictionary<string, Configuration> properties)
+            : this(properties.Keys.ToDictionary(key => ConfigurationKey.Key(key), key => properties[key])) { }
+
+        Configuration(Dictionary<ConfigurationKey, Configuration> configurations)
         {
-            ConfigurationProperties = properties;
-            foreach(var configuration in properties.Values)
-            {
+            ChildrenConfigurations = configurations;
+            foreach (var configuration in configurations.Values)
                 configuration.ParentConfiguration = this;
-            }
         }
 
-        public Configuration this[string key]
+        public Configuration this[ConfigurationKey key]
         {
             get
             {
-                return ConfigurationProperties[key];
+                return ChildrenConfigurations[key];
             }
             set
             {
-                ConfigurationProperties[key] = value;
-                if (value.ParentConfiguration == null)
-                    value.ParentConfiguration = this;
-            }
-        }
-
-        public Configuration this[int index]
-        {
-            get
-            {
-                return ConfigurationItems[index];
-            }
-            set
-            {
-                ConfigurationItems[index] = value;
+                ChildrenConfigurations[key] = value;
                 if (value.ParentConfiguration == null)
                     value.ParentConfiguration = this;
             }
@@ -121,7 +146,7 @@ namespace ConfigurationReader
             => ToArray(configuration, c => c.Bool());
 
         static T[] ToArray<T>(Configuration configuration, Func<Configuration, T> to)
-            => configuration.ConfigurationItems.Select(to).ToArray();
+            => configuration.ChildrenConfigurations.Values.Select(to).ToArray();
 
         public string String()
             => (string)Value;

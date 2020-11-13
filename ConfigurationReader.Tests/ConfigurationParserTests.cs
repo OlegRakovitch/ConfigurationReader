@@ -75,10 +75,10 @@ namespace ConfigurationReader.Tests
         }
 
         [Fact]
-        public void ThrowsIndexOutOfRangeExceptionForNonEmptyStringArray()
+        public void ThrowsKeyNotFoundExceptionForNonEmptyStringArray()
         {
             var configuration = Parse(new[] { "value" });
-            Assert.Throws<IndexOutOfRangeException>(() => configuration[1]);
+            Assert.Throws<KeyNotFoundException>(() => configuration[1]);
         }
 
         [Fact]
